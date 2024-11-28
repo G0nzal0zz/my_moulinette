@@ -11,8 +11,6 @@
                         def repoUrl = params.GITHUB_REPO
                         def folderName = repoUrl.split('/').last().replaceAll('.git$', '')
                         echo "Derived folder name: ${folderName}"
-
-                        // Use folderName as a local variable in further stages
                         env.REPO_FOLDER = folderName
                     }
                 }
@@ -21,7 +19,6 @@
             stage('Clone Repository') {
                 steps {
                     script {
-                        // Clone the repository if the folder does not already exist
                         sh """
                         if [ -d "${env.REPO_FOLDER}" ]; then
                             echo "The folder '${env.REPO_FOLDER}' already exists. Skipping clone."
@@ -38,12 +35,10 @@
             stage('Build') {
                 steps {
                     script {
-                        // Change into the repository folder and build the project
                         sh """
                         cd "${env.REPO_FOLDER}"
                         echo "Current directory: \$(pwd)"
 
-                        # Run the build and tests
                         make re
                         """
                     }
@@ -52,13 +47,11 @@
             stage('Tests') {
                 steps {
                     script {
-                        // Change into the repository folder and build the project
                         sh """
                         cd "${env.REPO_FOLDER}"
                         make tests
                         TEST_OUTPUT=\$?  # Capture the exit code of 'make tests'
 
-                        # Check the exit code of the tests
                         if [ \$TEST_OUTPUT -ne 0 ]; then
                             echo "Tests failed"
                             exit 1  # Fail the pipeline if tests fail
